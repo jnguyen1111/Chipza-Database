@@ -1,0 +1,77 @@
+--Creating a table for Chipza employees
+CREATE TABLE employee(
+    emp_id INT PRIMARY KEY,
+   first_name VARCHAR(40),
+   last_name VARCHAR(40),
+   birth_day DATE,
+   sex VARCHAR(1),
+   salary INT,
+   branch_id INT
+);
+
+--creating a table for branch section where employees work at
+CREATE TABLE branch(
+    branch_id INT PRIMARY KEY,
+    branch_name VARCHAR(40),
+    product_id INT
+);
+
+--creating a table for supplier to supply to the branch
+CREATE TABLE supplier(
+    supplier_id INT PRIMARY KEY,
+    supplier_name VARCHAR(40),
+    supplier_type VARCHAR(40),
+    branch_id INT,
+   FOREiGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE CASCADE
+);
+
+--creating a table for products that a specific branch manufacturs
+CREATE TABLE product(
+    product_id INT PRIMARY KEY,
+    product_name VARCHAR(40),
+    product_price INT,
+    branch_id INT,
+    FOREIGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE SET NULL
+);
+
+--creating a table for client to use in collabration with employee
+CREATE TABLE client(
+    client_id INT PRIMARY KEY,
+    client_first VARCHAR(40),
+    client_last VARCHAR(40)
+);
+
+--creating a table for client who orders products from an employee at Chipza
+CREATE TABLE collaborate(
+    emp_id INT,
+    client_id INT,
+    total_sales INT,
+    product_id INT,
+    PRIMARY KEY(emp_id, client_id,product_id),
+    FOREIGN KEY(product_id) REFERENCES product(product_id) ON DELETE CASCADE,
+    FOREIGN KEY(emp_id) REFERENCES employee(emp_id) ON DELETE CASCADE,
+    FOREIGN KEY(client_id) REFERENCES client(client_id) ON DELETE CASCADE
+);
+
+--add info to the database
+
+-- add the foreign key for employee to link to branch where they work at
+ALTER TABLE employee
+ADD FOREIGN KEY(branch_id)
+REFERENCES branch(branch_id)
+ON DELETE SET NULL;
+
+SELECT * FROM employee;
+DROP TABLE employee;
+
+SELECT * FROM branch;
+DROP TABLE branch;
+
+SELECT * FROM branch;
+DROP TABLE branch;
+
+SELECT * FROM branch;
+DROP TABLE branch;
+
+SELECT * FROM branch;
+DROP TABLE branch;
