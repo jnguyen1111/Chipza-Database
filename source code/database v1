@@ -16,15 +16,6 @@ CREATE TABLE branch(
     product_id INT
 );
 
---creating a table for supplier to supply to the branch
-CREATE TABLE supplier(
-    supplier_id INT PRIMARY KEY,
-    supplier_name VARCHAR(40),
-    supplier_type VARCHAR(40),
-    branch_id INT,
-   FOREiGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE CASCADE
-);
-
 --creating a table for products that a specific branch manufacturs
 CREATE TABLE product(
     product_id INT PRIMARY KEY,
@@ -34,11 +25,21 @@ CREATE TABLE product(
     FOREIGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE SET NULL
 );
 
+--creating a table for supplier to supply to the branch
+CREATE TABLE supplier(
+    supplier_id INT PRIMARY KEY,
+    supplier_name VARCHAR(40),
+    supplier_type VARCHAR(40),
+    branch_id INT,
+   FOREiGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE CASCADE
+);
+
 --creating a table for client to use in collabration with employee
 CREATE TABLE client(
     client_id INT PRIMARY KEY,
-    client_first VARCHAR(40),
-    client_last VARCHAR(40)
+    client_name VARCHAR(40),
+    branch_id INT,
+    FOREIGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE SET NULL
 );
 
 --creating a table for client who orders products from an employee at Chipza
@@ -53,25 +54,138 @@ CREATE TABLE collaborate(
     FOREIGN KEY(client_id) REFERENCES client(client_id) ON DELETE CASCADE
 );
 
---add info to the database
-
 -- add the foreign key for employee to link to branch where they work at
 ALTER TABLE employee
 ADD FOREIGN KEY(branch_id)
 REFERENCES branch(branch_id)
 ON DELETE SET NULL;
 
+-- add the foreign key to branch to link it to the product manufactured
+ALTER TABLE branch
+ADD FOREIGN KEY(product_id) 
+REFERENCES product(product_id) 
+ON DELETE SET NULL;
+
+--update the foreign key of branch
+UPDATE branch
+SET product_id = 3291327
+WHERE branch_name = 'Cryus';
+
+UPDATE branch
+SET product_id = 3291326
+WHERE branch_name = 'Velocity';
+
+UPDATE branch
+SET product_id = 3291325
+WHERE branch_name = 'Rosetta';
+
+UPDATE branch
+SET product_id = 3291324
+WHERE branch_name = 'Gridiron';
+
+--                             add info to the database
+-- add employees
+INSERT INTO employee VALUES(103, 'Angela', 'Martin', '1971-06-25','F',63000, 1);
+INSERT INTO employee VALUES(104, 'Kelly', 'Kapoor', '1980-02-05','F',55000, 2);
+INSERT INTO employee VALUES(105, 'Stanley', 'Hudson', '1958-02-19','M',69000,3);
+INSERT INTO employee VALUES(106, 'Thomas', 'Thompson', '1987-01-11','M',125000,4);
+INSERT INTO employee VALUES(107, 'Jim', 'Lee', '1988-02-19','M',81000,1);
+
+--add branches
+INSERT INTO branch VALUES(1, 'Cryus',  NULL);
+INSERT INTO branch VALUES(2, 'Velocity',NULL);
+INSERT INTO branch VALUES(3, 'Rosetta',NULL);
+INSERT INTO branch VALUES(4, 'Gridiron',NULL);
+
+--add products
+INSERT INTO product VALUES(3291327, 'QuickSlick21v',420,1);
+INSERT INTO product VALUES(3291326, 'Blaze90v',359,2);
+INSERT INTO product VALUES(3291325, 'SwiftGale11v' , 370,3);
+INSERT INTO product VALUES(3291324, 'QuickStatic30v',310,4);
+
+--add branch suppliers
+INSERT INTO supplier VALUES(11, 'Compute Inc', 'Cpu Chips',1);
+INSERT INTO supplier VALUES(12, 'Vision Arm', 'Gpu Chips',2);
+INSERT INTO supplier VALUES(13, 'Electro Grid', 'RAM',3);
+INSERT INTO supplier VALUES(14, 'Cache Stache', 'Cpu Chips',1);
+INSERT INTO supplier VALUES(15, 'Wattson', 'Power supply',4);
+
+--add clients
+INSERT INTO client VALUES(400, 'American Airlines', 1);
+INSERT INTO client VALUES(401, 'Nivida', 2);
+INSERT INTO client VALUES(402, 'Best Buy', 1);
+INSERT INTO client VALUES(403, 'Microcenter', 4);
+INSERT INTO client VALUES(404, 'Amazon', 2);
+INSERT INTO client VALUES(405, 'NASA', 3);
+INSERT INTO client VALUES(406, 'Tesla', 1);
+
+--add values for relationship in collabration table
+INSERT INTO collaborate VALUES(103, 400, 55000,3291327);
+INSERT INTO collaborate VALUES(103, 402, 130000,3291327);
+INSERT INTO collaborate VALUES(107, 406, 22500,3291327);
+INSERT INTO collaborate VALUES(107, 400, 26000,3291327);
+
+INSERT INTO collaborate VALUES(105, 405, 33000,3291325);
+
+INSERT INTO collaborate VALUES(104, 401, 267000,3291326);
+INSERT INTO collaborate VALUES(104, 404, 15000,3291326);
+
+INSERT INTO collaborate VALUES(106, 403, 10000,3291324);
+
+-- check all database tables and their data
 SELECT * FROM employee;
 DROP TABLE employee;
 
 SELECT * FROM branch;
 DROP TABLE branch;
 
-SELECT * FROM branch;
-DROP TABLE branch;
+SELECT * FROM product;
+DROP TABLE product;
 
-SELECT * FROM branch;
-DROP TABLE branch;
+SELECT * FROM supplier;
+DROP TABLE supplier;
 
-SELECT * FROM branch;
-DROP TABLE branch;
+SELECT * FROM client;
+DROP TABLE client;
+
+SELECT * FROM collaborate;
+DROP TABLE collaborate;
+
+-- order the employees by salary
+SELECT * FROM employee ORDER BY salary DESC;
+
+--order the employees by name alphabetically
+SELECT * FROM employee ORDER BY first_name , last_name;
+
+--count the number of employees
+SELECT COUNT(emp_id) FROM employee;
+
+--find the average employee salary
+SELECT AVG(salary) FROM employee;
+
+--find the number of males and females at the comapany
+SELECT COUNT (sex) sex FROM employee GROUP BY sex;
+
+--find the total number of products sold
+SELECT AVG (total_sales) FROM collaborate;
+
+--find supplier that manufactures cpu chips
+SELECT * FROM supplier WHERE supplier_type LIKE 'Cpu%';
+
+--find supplier that manufactures power supplies
+SELECT * FROM supplier WHERE supplier_type LIKE '%supply';
+
+--get the id of all products employees and branches etcl
+SELECT emp_id FROM employee UNION SELECT branch_id FROM branch UNION SELECT supplier_id FROM supplier UNION SELECT product_id FROM product;
+
+--find the branch where employees are assigned
+SELECT employee.emp_id, employee.first_name, branch.branch_name
+FROM employee
+JOIN branch
+ON employee.branch_id = branch.branch_id;
+
+--find the employee who sold the most items to a certain client
+SELECT employee.first_name , employee.last_name FROM employee
+WHERE employee.emp_id IN(
+    SELECT collaborate.emp_id FROM collaborate WHERE collaborate.total_sales = (SELECT MAX(collaborate.total_sales) FROM collaborate) 
+);
